@@ -1,0 +1,4 @@
+# Block script execution inside the uploads folder
+<FilesMatch "\.(?i:php|phtml|php3|php4|php5|pl|py|cgi|sh)$">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lime WYSIWYG Editor</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<div class="container">
+  <h1><span class="brand">Lime</span> WYSIWYG Editor</h1>
+
+  <div class="editor" id="editor">
+    <div class="toolbar" id="toolbar">
+      <div class="toolbar-group">
+        <button type="button" data-cmd="undo" title="Undo">↺</button>
+        <button type="button" data-cmd="redo" title="Redo">↻</button>
+      </div>
+      <div class="toolbar-group">
+        <button type="button" data-cmd="formatBlock" data-value="P" class="active" title="Paragraph">¶</button>
+        <button type="button" data-cmd="formatBlock" data-value="H1" title="Heading 1">H1</button>
+        <button type="button" data-cmd="formatBlock" data-value="H2" title="Heading 2">H2</button>
+        <button type="button" data-cmd="formatBlock" data-value="H3" title="Heading 3">H3</button>
+        <button type="button" data-cmd="formatBlock" data-value="PRE" title="Code block">&lt;/&gt;</button>
+        <button type="button" data-cmd="formatBlock" data-value="BLOCKQUOTE" title="Quote">❝</button>
+      </div>
+      <div class="toolbar-group">
+        <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+        <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+        <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
+        <button type="button" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+        <button type="button" data-cmd="superscript" title="Superscript">x²</button>
+        <button type="button" data-cmd="subscript" title="Subscript">x₂</button>
+      </div>
+      <div class="toolbar-group">
+        <select data-cmd="fontName" title="Font" id="fontName">
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        <select data-cmd="fontSize" title="Font size" id="fontSize">
+          <option value="1">Small</option>
+          <option value="3" selected>Normal</option>
+          <option value="4">Large</option>
+          <option value="5">Huge</option>
+          <option value="6">Giant</option>
+        </select>
+        <input type="color" data-cmd="foreColor" id="fgColor" value="#000000" title="Text color">
+        <input type="color" data-cmd="backColor" id="bgColor" value="#ffff00" title="Highlight">
+      </div>
+      <div class="toolbar-group">
+        <button type="button" data-cmd="insertUnorderedList" title="Bullet list">•≡</button>
+        <button type="button" data-cmd="insertOrderedList" title="Numbered list">1≡</button>
+        <button type="button" data-cmd="outdent" title="Outdent">⇤</button>
+        <button type="button" data-cmd="indent" title="Indent">⇥</button>
+      </div>
+      <div class="toolbar-group">
+        <button type="button" data-cmd="justifyLeft" title="Align left">⬅</button>
+        <button type="button" data-cmd="justifyCenter" title="Align center">⬌</button>
+        <button type="button" data-cmd="justifyRight" title="Align right">➡</button>
+        <button type="button" data-cmd="justifyFull" title="Justify">☰</button>
+      </div>
+      <div class="toolbar-group">
+        <button type="button" data-cmd="createLink" title="Insert link" id="linkBtn">🔗</button>
+        <button type="button" data-cmd="unlink" title="Remove link">🔓</button>
+        <button type="button" data-cmd="insertImage" title="Insert image" id="imgBtn">🖼</button>
+        <button type="button" data-cmd="insertHorizontalRule" title="Horizontal rule">—</button>
+      </div>
+      <div class="toolbar-group">
+        <button type="button" data-cmd="removeFormat" title="Clear formatting">✂</button>
+      </div>
+    </div>
+
+    <div class="docbar">
+      <input type="text" id="docTitle" placeholder="Document title" value="Untitled">
+      <select id="docList">
+        <option value="">(saved documents)</option>
+      </select>
+      <button type="button" id="loadBtn">Load</button>
+      <button type="button" id="newBtn">New</button>
+      <button type="button" id="saveBtn" class="primary">Save</button>
+    </div>
+
+    <div class="content" id="content" contenteditable="true" spellcheck="true">
+      <h1>Welcome to the WYSIWYG Editor</h1>
+      <p>Select text and use the toolbar above to format it.</p>
+      <ul>
+        <li>Try <b>bold</b>, <i>italic</i>, and <u>underline</u></li>
+        <li>Change <span style="color: #e74c3c;">colors</span> and <span style="background-color: #ffff00;">highlights</span></li>
+      </ul>
+      <blockquote>Click the toolbar buttons or press Ctrl+B / Ctrl+I / Ctrl+U to see live results.</blockquote>
+    </div>
+
+    <div class="statusbar">
+      <span id="stats">Words: 0 &nbsp;|&nbsp; Characters: 0</span>
+      <div>
+        <label class="toggle">
+          <input type="checkbox" id="htmlView"> HTML View
+        </label>
+        <button type="button" id="clearBtn">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="out"></div>
+</div>
+
+<script src="editor.js"></script>
+</body>
+</html>
