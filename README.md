@@ -6,14 +6,15 @@
 
 **A lightweight, WordPress-style rich text editor with image uploads and MySQL persistence.**
 
-[![Version](badges/version-1.0.0.svg)](https://github.com/shaik-obydullah/lime-wysiwyg-editor)
-[![License](badges/license-MIT.svg)](LICENSE)
-[![PHP](badges/php-8.3.svg)](https://www.php.net/)
-[![MySQL](badges/mysql-8.0.svg)](https://www.mysql.com/)
-[![Docker](badges/docker-ready.svg)](https://www.docker.com/)
-[![JavaScript](badges/javascript.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![HTML5](badges/html5.svg)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](badges/css3.svg)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue)](https://github.com/shaik-obydullah/lime-wysiwyg-editor)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-8.4-%23777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-%234479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Apache](https://img.shields.io/badge/Apache-%23D22128?logo=apache&logoColor=white)](https://httpd.apache.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-%232496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-%23F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![HTML5](https://img.shields.io/badge/HTML5-%23E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-%231572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 
 </div>
 
@@ -39,13 +40,13 @@ Part of the **Lime** family of open-source tools.
 
 ## Tech Stack
 
-| Layer    | Technology |
-|----------|------------|
+| Layer    | Technology                                                                  |
+| -------- | --------------------------------------------------------------------------- |
 | Frontend | HTML5, CSS3, Vanilla JavaScript (`contenteditable`, `document.execCommand`) |
-| Backend  | PHP 8.3+ (PDO, prepared statements) |
-| Database | MySQL 8.0 |
-| Server   | Apache (official `php:8.3-apache` image) |
-| DevOps   | Docker, Docker Compose |
+| Backend  | PHP 8.3+ (PDO, prepared statements)                                         |
+| Database | MySQL 8.0                                                                   |
+| Server   | Apache (official `php:8.3-apache` image)                                    |
+| DevOps   | Docker, Docker Compose                                                      |
 
 ## Quick Start (Docker)
 
@@ -101,12 +102,12 @@ The `documents` table is created automatically on first request. Make sure `uplo
 
 ## API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `save.php` | POST | Save/update a document. Body: `{ "id"?: int, "title": string, "content": string }`. Returns `{ success, id }`. |
-| `load.php` | GET | Load a document. `?id=N` loads a specific one; without `id` returns the latest. |
-| `list.php` | GET | List all documents: `{ id, title, updated_at }[]` |
-| `upload.php` | POST | Upload an image. Multipart field `image`. Returns `{ success, url }`. |
+| Endpoint     | Method | Description                                                                                                    |
+| ------------ | ------ | -------------------------------------------------------------------------------------------------------------- |
+| `save.php`   | POST   | Save/update a document. Body: `{ "id"?: int, "title": string, "content": string }`. Returns `{ success, id }`. |
+| `load.php`   | GET    | Load a document. `?id=N` loads a specific one; without `id` returns the latest.                                |
+| `list.php`   | GET    | List all documents: `{ id, title, updated_at }[]`                                                              |
+| `upload.php` | POST   | Upload an image. Multipart field `image`. Returns `{ success, url }`.                                          |
 
 ## Database Schema
 
@@ -149,12 +150,12 @@ lime-wysiwyg-editor/
 
 All settings are environment variables (used by the Docker Compose `editor` service):
 
-| Variable  | Default      | Description              |
-|-----------|--------------|--------------------------|
-| `DB_HOST` | `db`         | MySQL host               |
-| `DB_NAME` | `wysiwyg`    | Database name            |
-| `DB_USER` | `editor`     | Database user            |
-| `DB_PASS` | `editor_pass`| Database password        |
+| Variable  | Default       | Description       |
+| --------- | ------------- | ----------------- |
+| `DB_HOST` | `db`          | MySQL host        |
+| `DB_NAME` | `wysiwyg`     | Database name     |
+| `DB_USER` | `editor`      | Database user     |
+| `DB_PASS` | `editor_pass` | Database password |
 
 ## Security Notes
 
@@ -165,11 +166,11 @@ All settings are environment variables (used by the Docker Compose `editor` serv
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| `Connection refused` on first boot | MySQL is still initializing — wait and run `docker compose up -d` again. |
+| Problem                                   | Solution                                                                                                     |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `Connection refused` on first boot        | MySQL is still initializing — wait and run `docker compose up -d` again.                                     |
 | `Permission denied` writing to `uploads/` | Run `docker compose up -d --build` (the entrypoint chowns the folder to `www-data`), or `chmod 775 uploads`. |
-| Port `8080`/`8081`/`3306` already in use | Change the left-hand port in `docker-compose.yml`. |
+| Port `8080`/`8081`/`3306` already in use  | Change the left-hand port in `docker-compose.yml`.                                                           |
 
 ## License
 
