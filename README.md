@@ -6,11 +6,14 @@
 
 **A lightweight, WordPress-style rich text editor with image uploads and MySQL persistence.**
 
-[![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)](https://github.com/shaik-obydullah/lime-wysiwyg-editor)
-[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
-[![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4)](https://www.php.net/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1)](https://www.mysql.com/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](https://www.docker.com/)
+[![Version](badges/version-1.0.0.svg)](https://github.com/shaik-obydullah/lime-wysiwyg-editor)
+[![License](badges/license-MIT.svg)](LICENSE)
+[![PHP](badges/php-8.3.svg)](https://www.php.net/)
+[![MySQL](badges/mysql-8.0.svg)](https://www.mysql.com/)
+[![Docker](badges/docker-ready.svg)](https://www.docker.com/)
+[![JavaScript](badges/javascript.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![HTML5](badges/html5.svg)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![CSS3](badges/css3.svg)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 
 </div>
 
@@ -136,7 +139,10 @@ lime-wysiwyg-editor/
 │   └── .htaccess
 ├── Dockerfile              # PHP 8.3 + Apache + pdo_mysql
 ├── docker-compose.yml      # Editor + MySQL + Adminer services
-└── docker-entrypoint.sh    # Fixes uploads/ permissions at startup
+├── docker-entrypoint.sh    # Fixes uploads/ permissions at startup
+├── AGENTS.md               # Guidance for AI coding agents
+├── case-study.html         # Published case study (TinyMCE-ready content)
+└── badges/                 # Self-hosted shields-style tech badges
 ```
 
 ## Configuration

@@ -1,0 +1,228 @@
+<h1>Case Study: Building Lime WYSIWYG Editor — A Zero-Dependency Rich Text Editor with MySQL Persistence</h1>
+
+<p><em>Published by shaik-obydullah &middot; Part of the Lime family of open-source tools &middot; v1.0.0 &middot; MIT License</em></p>
+
+<h2>Overview</h2>
+
+<p>Lime WYSIWYG Editor is a self-contained, browser-based rich text editor built with vanilla JavaScript and the HTML5 <code>contenteditable</code> attribute. It ships with a full formatting toolbar, a WordPress-style image uploader, and a PHP/MySQL backend so documents — including embedded image URLs — persist across sessions.</p>
+
+<p>The entire project is about <strong>one screen</strong>: an editor pane where a user can format text, drop in images, save a document with a title, and reload it later. It is deliberately small, dependency-free on the frontend, and packaged for Docker so it runs with a single command.</p>
+
+<h2>The Problem</h2>
+
+<p>Many teams reach for heavyweight editor frameworks (TinyMCE, Quill, CKEditor, ProseMirror) for what is often a simple requirement: a reliable "write and save" text area. Those libraries bring:</p>
+
+<ul>
+  <li><strong>Large bundle sizes</strong> — hundreds of KB (or MB) of JavaScript before a single character is typed.</li>
+  <li><strong>Build tooling overhead</strong> — webpack, Vite, React/Vue integrations, node_modules sprawl.</li>
+  <li><strong>Proprietary or dual-licensing considerations</strong> for commercial projects.</li>
+  <li><strong>Complexity that exceeds the need</strong> — collaborative editing, custom schemas, and plugin ecosystems most projects never touch.</li>
+</ul>
+
+<p>Meanwhile, the native browser primitives — <code>contenteditable</code> and the (sadly deprecated but still universally supported) <code>document.execCommand()</code> API — are capable of covering the 80% case for formatting rich text in a fraction of the code. The goal of this project was to prove that a genuinely useful editor can be built with <strong>zero frontend dependencies</strong>, a tiny PHP API, and one MySQL table.</p>
+
+<h2>Goals</h2>
+
+<ol>
+  <li>Deliver a full-featured formatting toolbar using only native browser APIs.</li>
+  <li>Persist documents (HTML + title) to MySQL with a minimal REST-style API.</li>
+  <li>Handle image uploads the way WordPress does — local file picker to server to URL.</li>
+  <li>Keep the attack surface small with real MIME validation and script-blocking.</li>
+  <li>Provide a one-command Docker setup for editor + database + admin tool.</li>
+  <li>Stay under ~300 lines of JavaScript for all editor logic.</li>
+</ol>
+
+<h2>Tech Stack</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Technology</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Frontend</td>
+      <td>HTML5, CSS3, Vanilla JavaScript</td>
+      <td><code>contenteditable</code> + <code>document.execCommand</code> for all formatting</td>
+    </tr>
+    <tr>
+      <td>Backend</td>
+      <td>PHP 8.3+</td>
+      <td>PDO, prepared statements, JSON API</td>
+    </tr>
+    <tr>
+      <td>Database</td>
+      <td>MySQL 8.0</td>
+      <td>Single <code>documents</code> table, UTF-8mb4</td>
+    </tr>
+    <tr>
+      <td>Web server</td>
+      <td>Apache</td>
+      <td>Official <code>php:8.3-apache</code> image</td>
+    </tr>
+    <tr>
+      <td>DevOps</td>
+      <td>Docker, Docker Compose</td>
+      <td>Editor + MySQL + Adminer in one stack</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Architecture</h2>
+
+<p>The application follows a deliberately simple three-tier structure:</p>
+
+<pre><code>browser (index.html + editor.js)
+   │  fetch() JSON
+   ▼
+PHP endpoints (save.php, load.php, list.php, upload.php)
+   │  PDO / filesystem
+   ▼
+MySQL (documents table)  ·  uploads/ (image files)</code></pre>
+
+<p><strong>Frontend.</strong> <code>index.html</code> defines the layout: a toolbar of grouped buttons, a document bar (title input, saved-document dropdown, Load/New/Save buttons), the <code>contenteditable</code> content area, and a status bar with live word/character counts and an HTML-View toggle. <code>editor.js</code> wires it together: every toolbar button carries a <code>data-cmd</code> attribute that maps to a <code>document.execCommand()</code> call, so adding a new formatting button is a one-line change in HTML with no JavaScript.</p>
+
+<p><strong>Backend.</strong> Each PHP file is an endpoint. <code>db.php</code> opens a PDO connection from environment variables and self-creates the <code>documents</code> table on first request — there is no migration step. <code>save.php</code> does an <code>UPDATE</code> or <code>INSERT</code> depending on whether a document id is present. <code>load.php</code> returns a specific document or the most recently updated one. <code>list.php</code> returns id/title/updated_at pairs for the dropdown. <code>upload.php</code> validates and stores images.</p>
+
+<p><strong>Data model.</strong> Following the WordPress model, MySQL stores only the HTML content with <code>&lt;img src="..."&gt;</code> references; the actual image bytes live in the <code>uploads/</code> directory. The schema is a single table:</p>
+
+<pre><code>documents (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  title      VARCHAR(255) NOT NULL DEFAULT 'Untitled',
+  content    LONGTEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)</code></pre>
+
+<h2>Key Features</h2>
+
+<ul>
+  <li><strong>Full formatting toolbar</strong> — undo/redo, headings (H1–H3, paragraph, code block, blockquote), bold/italic/underline/strikethrough/superscript/subscript.</li>
+  <li><strong>Typography</strong> — font family and size dropdowns, text color and highlight color pickers.</li>
+  <li><strong>Lists &amp; alignment</strong> — bullet/numbered lists, indent/outdent, left/center/right/justify.</li>
+  <li><strong>Links &amp; media</strong> — insert/remove links via prompt, WordPress-style image upload, horizontal rule.</li>
+  <li><strong>Document management</strong> — title input, saved-document dropdown, Load/New/Save, auto-timestamps.</li>
+  <li><strong>HTML View</strong> — toggle between rich text and raw HTML, so power users can hand-edit markup before saving.</li>
+  <li><strong>Live stats</strong> — real-time word and character counts.</li>
+  <li><strong>Keyboard support</strong> — Ctrl+B/I/U, Tab inserts an indent, shortcuts driven natively by the browser.</li>
+</ul>
+
+<h2>Design Decisions Worth Noting</h2>
+
+<h3>1. Zero-dependency frontend</h3>
+<p>There is no build step, no package.json, no node_modules. <code>editor.js</code> is a single IIFE (~290 lines) that talks to the DOM directly. Deployment is copying files onto a web server. This makes the project trivially auditable and maintainable.</p>
+
+<h3>2. Toolbar driven by data attributes</h3>
+<p>Buttons are declarative: <code>&lt;button data-cmd="bold"&gt;</code>. A single event listener on the toolbar reads <code>data-cmd</code>, executes the command, then refreshes toolbar state and stats. The active-state highlighting is handled generically with <code>document.queryCommandState()</code> and <code>document.queryCommandValue()</code>, keyed off a small list of toggle commands.</p>
+
+<h3>3. WordPress-style image pipeline</h3>
+<p>The image button creates a hidden file input, posts the file as multipart/form-data to <code>upload.php</code>, and on success inserts the returned absolute URL into the document with <code>execCommand('insertImage', false, url)</code>. This mirrors how WordPress handles media and keeps the DB small.</p>
+
+<h3>4. Self-bootstrapping schema</h3>
+<p><code>db.php</code> runs <code>CREATE TABLE IF NOT EXISTS</code> on every connection. First run "just works" — there is no separate schema.sql to apply.</p>
+
+<h3>5. HTML view via element swap</h3>
+<p>Toggling HTML View copies <code>innerHTML</code> into <code>textContent</code> (and back), a simple and safe way to show the raw markup without a textarea or extra editor state.</p>
+
+<h2>Security Measures</h2>
+
+<ul>
+  <li><strong>Real MIME validation</strong> — uploads are checked with <code>mime_content_type()</code>, not the client-supplied type, and restricted to jpg, png, gif, webp, svg, and bmp.</li>
+  <li><strong>Size limit</strong> — files larger than 2 MB are rejected with HTTP 413.</li>
+  <li><strong>Script execution blocked</strong> — <code>uploads/.htaccess</code> denies execution of PHP/scripts inside the uploads folder, and file names are server-generated with <code>uniqid()</code> so nothing user-supplied becomes a path.</li>
+  <li><strong>SQL injection resistant</strong> — all queries use PDO prepared statements.</li>
+  <li><strong>Honest limitation</strong> — content is stored as raw HTML and rendered via <code>innerHTML</code> by design. The README clearly warns that the editor is intended for trusted users and that content must be sanitized server-side before being shown on public pages.</li>
+</ul>
+
+<h2>Challenges &amp; Solutions</h2>
+
+<h3>Browser inconsistencies in execCommand</h3>
+<p><code>document.execCommand()</code> is formally deprecated and behaviors vary between browsers. The solution was to stick to well-tested commands, keep the toolbar state synced on every selection change (via the <code>selectionchange</code> event), and treat the editor as a best-effort rich text surface with an HTML view as the escape hatch.</p>
+
+<h3>First-boot MySQL readiness</h3>
+<p>MySQL takes several seconds to initialize its data directory, while Apache starts immediately. A Docker healthcheck on the database combined with <code>depends_on: condition: service_healthy</code> handles ordering, and the README documents the "wait and run compose up again" fallback for edge cases.</p>
+
+<h3>Uploads directory permissions</h3>
+<p>Apache needs write access to <code>uploads/</code>, which differs between Docker and bare-metal setups. The Docker entrypoint creates the directory and chowns it to <code>www-data</code> on every container start, removing a common source of runtime failures.</p>
+
+<h3>Tab key trapped inside the editor</h3>
+<p>By default Tab moves focus out of the content area. Intercepting the keydown event and calling <code>execCommand('insertHTML', '&#9;')</code> keeps the tab as an indentation key while typing.</p>
+
+<h2>Results</h2>
+
+<ul>
+  <li><strong>~290 lines of JavaScript</strong> implement the entire editor interaction — no framework, no build step.</li>
+  <li><strong>4 PHP endpoints</strong> totaling under 140 lines provide full CRUD + uploads.</li>
+  <li><strong>Zero frontend dependencies</strong>; the only server-side extension required is PHP <code>pdo_mysql</code>.</li>
+  <li><strong>One-command deployment</strong> — <code>docker compose up -d --build</code> brings up the editor on :8080, MySQL, and Adminer on :8081.</li>
+  <li><strong>Single-table persistence</strong> with automatic creation, timestamps, and a WordPress-compatible content model.</li>
+</ul>
+
+<h2>How to Run It</h2>
+
+<pre><code>git clone https://github.com/shaik-obydullah/lime-wysiwyg-editor.git
+cd lime-wysiwyg-editor
+docker compose up -d --build</code></pre>
+
+<p>Editor: <a href="http://localhost:8080">http://localhost:8080</a> &nbsp;·&nbsp; Adminer: <a href="http://localhost:8081">http://localhost:8081</a></p>
+
+<p>Prefer no Docker? Requires PHP 8.3+ with <code>pdo_mysql</code> and MySQL 8.0:</p>
+
+<pre><code>mysql -u root -p -e "CREATE DATABASE wysiwyg CHARACTER SET utf8mb4;"
+DB_HOST=127.0.0.1 DB_NAME=wysiwyg DB_USER=editor DB_PASS=editor_pass \
+  php -S localhost:8080</code></pre>
+
+<h2>API Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Endpoint</th>
+      <th>Method</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>save.php</code></td>
+      <td>POST</td>
+      <td>Save/update a document. Body: <code>{ "id"?: int, "title": string, "content": string }</code>. Returns <code>{ success, id }</code>.</td>
+    </tr>
+    <tr>
+      <td><code>load.php</code></td>
+      <td>GET</td>
+      <td>Load a document. <code>?id=N</code> loads a specific one; without <code>id</code> returns the latest.</td>
+    </tr>
+    <tr>
+      <td><code>list.php</code></td>
+      <td>GET</td>
+      <td>List all documents: <code>{ id, title, updated_at }[]</code>.</td>
+    </tr>
+    <tr>
+      <td><code>upload.php</code></td>
+      <td>POST</td>
+      <td>Upload an image (multipart field <code>image</code>). Returns <code>{ success, url }</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>What&rsquo;s Next</h2>
+
+<ul>
+  <li>Server-side HTML sanitization (e.g., an allow-list filter) so documents can be rendered on public pages safely.</li>
+  <li>Drag-and-drop and paste-into-editor image handling with automatic upload.</li>
+  <li>Document search and deletion endpoints, plus a simple document list UI.</li>
+  <li>Export to PDF/Markdown.</li>
+  <li>Optional auth layer for multi-user deployments.</li>
+</ul>
+
+<h2>Conclusion</h2>
+
+<p>Lime WYSIWYG Editor demonstrates that a production-usable rich text editor does not require a framework or a build pipeline. By leaning on <code>contenteditable</code>, <code>document.execCommand()</code>, a handful of thin PHP endpoints, and a single MySQL table, the project delivers the everyday 80% of editing — formatting, media, and persistence — in a codebase small enough to read in one sitting. It is MIT-licensed, Docker-ready, and designed as part of the Lime family of open-source tools.</p>
+
+<hr>
+
+<p><strong>Project links:</strong> <a href="https://github.com/shaik-obydullah/lime-wysiwyg-editor">GitHub repository</a> &nbsp;·&nbsp; <a href="https://github.com/shaik-obydullah">Author profile</a> &nbsp;·&nbsp; MIT License</p>
